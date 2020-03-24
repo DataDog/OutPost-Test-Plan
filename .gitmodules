@@ -1,0 +1,9 @@
+[submodule "eks/app/ecsdemo-crystal"]
+	path = eks/app/ecsdemo-crystal
+	url = https://github.com/brentley/ecsdemo-crystal.git
+[submodule "eks/app/ecsdemo-nodejs"]
+	path = eks/app/ecsdemo-nodejs
+	url = https://github.com/brentley/ecsdemo-nodejs.git
+[submodule "eks/app/ecsdemo-nodejs"]
+	path = eks/app/ecsdemo-nodejs
+	url = https://github.com/brentley/ecsdemo-frontend.git

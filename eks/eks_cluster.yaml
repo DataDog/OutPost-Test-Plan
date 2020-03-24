@@ -1,0 +1,39 @@
+apiVersion: eksctl.io/v1alpha5
+kind: ClusterConfig
+
+metadata:
+  name: outposts
+  region: us-east-2
+  version: '1.14'
+
+vpc:
+  id: "vpc-xxxxxxxxxxxxxxx"  # (CHANGEME to Outpost created VPC-id)
+  cidr: "192.168.0.0/16"       # (change if needed)
+  subnets:
+    private:
+      us-east-2a:
+        id: "subnet-xxxxxxxxxxxxxxxx"
+      us-east-2b:
+        id: "subnet-xxxxxxxxxxxxxxxx"
+    public:
+      us-east-2a:
+        id: "subnet-xxxxxxxxxxxxxxxx"
+      us-east-2b:
+        id: "subnet-xxxxxxxxxxxxxxxx"
+
+nodeGroups:
+  - name: ng-2
+    instanceType: m5.large
+    ami: ami-082bb518441d3954c
+    amiFamily: AmazonLinux2
+    minSize: 1
+    maxSize: 2
+    iam:
+      withAddonPolicies:
+        albIngress: true
+        autoScaler: true
+        cloudWatch: true
+
+cloudWatch:
+  clusterLogging:
+    enableTypes: ["audit", "authenticator", "controllerManager"]
