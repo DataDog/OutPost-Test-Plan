@@ -1,6 +1,6 @@
 <hr>
 
-# Sample Test Plan for Outposts v1.2
+# Sample Test Plan for Outposts v1.3
 
 #### For OutPost Version 
 
