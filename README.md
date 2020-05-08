@@ -1,86 +1,138 @@
-<hr>
+#### For OutPost Version
 
-# Sample Test Plan for Outposts v1.3
-
-#### For OutPost Version 
-
-**v1.2**
+**v1.3**
 
 Solution Overview
 ___
 ### Partner name:
-[Falco](https://falco.org/docs/)
+[Datadog](https://www.datadoghq.com/)
 
 ###  Industry vertical:
-Security Software
+Monitoring and Observability
 
 ###  Brief description of solution:
-Falco is a behavioral activity monitor designed to detect anomalous activity in your applications. Falco audits a system at the most fundamental level, the kernel. Falco then enriches this data with other input streams such as container runtime metrics, and Kubernetes metrics.
+Datadog is a SaaS-based monitoring and analytics platform for large-scale applications and infrastructure. Combining real-time logs, metrics from servers, containers, databases, and applications with end-to-end tracing, Datadog delivers actionable alerts and powerful visualizations to provide full-stack observability. Datadog includes over 400 vendor-supported integrations and APM libraries for several languages.
 
 ###  Customer use case for running the solution on Outposts:
-For the many customer running Kubernetes or containers on outposts, having realtime security, and monitoring is extremely important. With Outposts being connected back to on-premise datacenters having the abiity to audit kernal level signal calls can prevent bad actors before reaching key infrastructure.
+Customers running services on Outposts will have the need to not only monitor the health and performance of those services (eg. EKS clusters, EC2 instances, RDS databases etc.) but also the applications they run on them. Datadog can monitor technologies on Outposts, as well as customer's own on-prem infrastructure, and provide a single consolidated place to view and analyze the data from every part of their technology stack.
 
 ### Existing AWS Marketplace offering:
-If yes provide a link to the marketplacve offering
-No marketplace offering, check out blog about how to install on AWS.
-https://aws.amazon.com/blogs/opensource/securing-amazon-eks-lambda-falco/
+_If yes provide a link to the marketplace offering_
 
-### Has the been tested on EKS?
-Yes Falco has developed an AWS solutions repo with fluent-bit Firelens integration on Github for EKS 1.12, 1.13, 1.14, and 1.15.
-https://github.com/falcosecurity/falco-aws-firelens-integration
+Yes, Datadog products can be found on the [AWS Marketplace here](https://aws.amazon.com/marketplace/seller-profile?id=e56c35d0-c5d4-4dac-91d5-ebf57fef6e5c)
+
+### Has the product been tested on EKS?
+Yes, Datadog has an official integration with EKS. More information can be found on:
+* [Docs page](https://docs.datadoghq.com/integrations/amazon_eks/)
+* [Blog post](https://www.datadoghq.com/blog/eks-monitoring-datadog/)
 
 ###  AWS services the solution requires locally on Outposts:
+For EKS:
 * EKS
 * EC2
-* EBS
+* Any other services being used, eg. ELB, AppMesh
 
 ### AWS services the solution will need to access from the AWS Cloud:
 * IAM
-
+* CloudWatch
 
 ### Has an architecture diagram of the solution on Outposts been created ?
-If Yes. Attach image to test plan.
+_If Yes. Attach image to test plan._
+
+Yes, EKS integration [architecture diagram here](https://imgix.datadoghq.com/img/blog/eks-monitoring-datadog/eks-monitoring-datadog-cluster-agent.png)
 
 ### Any reason why more than (1) Outpost rack will be needed for your test?
-If so provide a brief description why and refer to test plan.
+_If so provide a brief description why and refer to test plan._
+
+No, only one should be required.
 ___
 
 # Test Plan
 
 ### Summary of test objectives and acceptance criteria:
-EKSctl will create four subnets (two “public”, two “private”) and launch (1) EC2 instance to perform an installation, configuration, and functionality test of ABC running on Outposts. One of the EKS instances will be installed with the Falco Daemonset, and one test applcation to collect data. Success will be determined when the falco data from the running outpost can be viewed via CLI from a client computer.
+Objectives:
+1. Create a basic EKS cluster
+2. Launch one EC2 instance as a bastion host used to install/configure the Datadog Agents
+3. Install Datadog Container Agent on EKS cluster containers
+4. Install Datadog node-based Agent on EC2 instances
+
+Acceptance Criteria:
+1. Success is achieved when metrics and logs about the EKS environment are visible on Datadog's default dashboards
 
 ### Test environment details:
 
-#### VPCS Subnets
-* 2 “Public” subnet:
-* 2 “Private” subnet:
-
 #### EKS NodeGroup
-*  2 EC2 instances: Linux Amazon Linux 2
+*  2 EC2 instances
 
 #### IAM Roles
-* 1 Iam Role for Falco Log aggregator to send logs to cloudwatch logs
+* 1 IAM Role with policy that has the required permissions to query the CloudWatch API for metrics
+    * This is required for Datadog to query CloudWatch metrics
 
+#### VPC
+* 1 new VPS for the test EKS cluster
 ------
 
 ### Test 1 description:
-Create the subnets and launch EC2 instances for the infrastructure resources for the ABC environment and install ABC software components.
+Create a basic EKS cluster, setup the Datadog Cluster Agent and datadog node-based Agent. Finally, verify metrics and logs are visible in Datadog.
 
 ### Test 1 steps:
-*	Create outpost 2 “Public” subnet
-*	Create outpost 2 “Private” subnet
-*	Replace VPC ID and Subnet ID's in eks/eks_cluster.yaml
-*	cd into eks/
-*	Run `make cluster` to deploy the EKS cluster
-*	Run `deploy-iam` to deploy falco
-*	Run `deploy-falco` to deploy falco
-*	Run `deploy-fluent` to deploy falco
-*	Run `deploy-app` to deploy sample application
+* Create a basic EKS cluster using `eksctl`
+```
+eksctl create cluster
+```
+A cluster will be created with default parameters:
+
+- auto-generated name, e.g. "fabulous-mushroom-1527688624"
+- 2x m5.large nodes
+- use official AWS EKS AMI
+- us-west-2 region
+- dedicated VPC
+- using static AMI resolver
+
+* Configure RBAC permissions for the Cluster Agent and node-based Agents
+Use the included `cluster-agent-rbac.yaml`, `datadog-rbac.yaml` to deploy:
+
+```
+$ kubectl apply -f /path/to/cluster-agent-rbac.yaml
+$ kubectl apply -f /path/to/datadog-rbac.yaml
+```
+
+* Secure communication between node-based Agents and the Cluster Agent
+Generate a secret token to use in the included `dca-secret.yaml` file (replace `<TOKEN>` value):
+```
+echo -n '<32_CHARACTER_LONG_STRING>' | base64
+vi /path/to/dca-secret.yaml
+```
+
+Create the secret:
+```
+$ kubectl apply -f /path/to/dca-secret.yaml
+```
+
+* Create and deploy the Cluster Agent manifest
+Use the included `datadog-cluster-agent.yaml` file (replace `<YOUR_API_KEY>` with Datadog API key)
+```
+$ kubectl apply -f /path/to/datadog-cluster-agent.yaml
+```
+
+* Deploy the node-based Agent DaemonSet
+Use the included `datadog-agent.yaml` file (replace `<YOUR_API_KEY>` with Datadog API key)
+```
+$ kubectl apply -f /path/to/datadog-agent.yaml
+```
+
+**CloudWatch Setup**
+
+* Create a new role in the AWS IAM Console and attach a policy that has the required permissions to query the CloudWatch API for metrics
+
+* In Datadog, configure the [AWS Integration Tile](https://app.datadoghq.com/account/settings#integrations/amazon_web_services) with:
+    * AWS Account ID
+    * Role Name
+    * Tick the boxes for: "EC2", "EC2 API", "EC2 Spot Fleet" and "EBS"
+
 
 ### Test 1 success criteria:
-* go to cloudwatch logs -> loggroups -> falco ... check logging and audit messages are showing up
-
+* Navigate to Datadog and verify dashboard contains EKS metrics
 
 ___
 
