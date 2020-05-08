@@ -76,7 +76,7 @@ Acceptance Criteria:
 Create a basic EKS cluster, setup the Datadog Cluster Agent and datadog node-based Agent. Finally, verify metrics and logs are visible in Datadog.
 
 ### Test 1 steps:
-* Create a basic EKS cluster using `eksctl`
+**1. Create a basic EKS cluster using `eksctl`**
 ```
 eksctl create cluster
 ```
@@ -89,15 +89,16 @@ A cluster will be created with default parameters:
 - dedicated VPC
 - using static AMI resolver
 
-* Configure RBAC permissions for the Cluster Agent and node-based Agents
-Use the included `cluster-agent-rbac.yaml`, `datadog-rbac.yaml` to deploy:
+**2. Configure RBAC permissions for the Cluster Agent and node-based Agents
+Use the included `cluster-agent-rbac.yaml`, `datadog-rbac.yaml` to deploy**
 
 ```
 $ kubectl apply -f /path/to/cluster-agent-rbac.yaml
 $ kubectl apply -f /path/to/datadog-rbac.yaml
 ```
 
-* Secure communication between node-based Agents and the Cluster Agent
+**3. Secure communication between node-based Agents and the Cluster Agent**
+
 Generate a secret token to use in the included `dca-secret.yaml` file (replace `<TOKEN>` value):
 ```
 echo -n '<32_CHARACTER_LONG_STRING>' | base64
@@ -109,7 +110,8 @@ Create the secret:
 $ kubectl apply -f /path/to/dca-secret.yaml
 ```
 
-* Create and deploy the Cluster Agent manifest
+**4. Create and deploy the Cluster Agent manifest**
+
 Use the included `datadog-cluster-agent.yaml` file (replace `<YOUR_API_KEY>` with Datadog API key)
 ```
 $ kubectl apply -f /path/to/datadog-cluster-agent.yaml
@@ -121,7 +123,7 @@ Use the included `datadog-agent.yaml` file (replace `<YOUR_API_KEY>` with Datado
 $ kubectl apply -f /path/to/datadog-agent.yaml
 ```
 
-**CloudWatch Setup**
+**5. Setup CloudWatch**
 
 * Create a new role in the AWS IAM Console and attach a policy that has the required permissions to query the CloudWatch API for metrics
 
