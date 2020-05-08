@@ -89,8 +89,9 @@ A cluster will be created with default parameters:
 - dedicated VPC
 - using static AMI resolver
 
-**2. Configure RBAC permissions for the Cluster Agent and node-based Agents
-Use the included `cluster-agent-rbac.yaml`, `datadog-rbac.yaml` to deploy**
+**2. Configure RBAC permissions for the Cluster Agent and node-based Agents**
+
+Use the included `cluster-agent-rbac.yaml`, `datadog-rbac.yaml` to deploy
 
 ```
 $ kubectl apply -f /path/to/cluster-agent-rbac.yaml
