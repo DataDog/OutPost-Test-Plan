@@ -69,7 +69,7 @@ Acceptance Criteria:
     * This is required for Datadog to query CloudWatch metrics
 
 #### VPC
-* 1 new VPS for the test EKS cluster
+* 1 new VPC for the test EKS cluster
 ------
 
 ### Test 1 description:
