@@ -83,14 +83,6 @@ Use the included `cluster.yaml` file to create an EKS cluster.
 ```
 eksctl create cluster -f eks_cluster.yaml
 ```
-A cluster will be created with default parameters:
-
-- auto-generated name, e.g. "fabulous-mushroom-1527688624"
-- 2x m5.large nodes
-- use official AWS EKS AMI
-- us-west-2 region
-- dedicated VPC
-- using static AMI resolver
 
 **2. Configure RBAC permissions for the Cluster Agent and node-based Agents**
 
