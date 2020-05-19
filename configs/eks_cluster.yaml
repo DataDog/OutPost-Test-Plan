@@ -1,0 +1,32 @@
+apiVersion: eksctl.io/v1alpha5
+kind: ClusterConfig
+
+metadata:
+  name: outpost
+  region: us-west-2
+
+nodeGroups:
+  - name: outpost
+    instanceType: m5.4xlarge  # or use c5d.9xlarge
+    desiredCapacity: 2
+    minSize: 2
+    maxSize: 2
+    availabilityZones: ["us-west-2a"] #Specifiy the Outpost Subnet AZ
+    privateNetworking: true #Removes the 2 subnets per AZ requirement during lauch
+    ssh: # An existing key pair for EC2 host test
+      publicKeyName: outpost_key
+
+
+vpc:
+  id: "vpc-0470143a7c277ae00"
+  cidr: "192.168.0.0/16"
+  subnets:
+    private:
+      us-west-2a:
+        id: "subnet-09020bc85e58f9bbf" #Outpost Subnet
+      us-west-2b:
+        id: "subnet-0620283eb6fe258cc" #Other subnet in the VPC
+
+cloudWatch:
+  clusterLogging:
+    enableTypes: ["*"]

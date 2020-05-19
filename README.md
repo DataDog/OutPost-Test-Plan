@@ -77,8 +77,11 @@ Create a basic EKS cluster, setup the Datadog Cluster Agent and datadog node-bas
 
 ### Test 1 steps:
 **1. Create a basic EKS cluster using `eksctl`**
+
+Use the included `cluster.yaml` file to create an EKS cluster.
+
 ```
-eksctl create cluster
+eksctl create cluster -f eks_cluster.yaml
 ```
 A cluster will be created with default parameters:
 
